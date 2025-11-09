@@ -28,7 +28,10 @@ SET default_table_access_method = heap;
 CREATE TABLE public.lokacije (
     id integer NOT NULL,
     naziv character varying(100) NOT NULL,
-    nadmorska_visina integer
+    nadmorska_visina integer,
+    vrsta_lokacije character varying(50),
+    latitude numeric(10,8),
+    longitude numeric(11,8)
 );
 
 
@@ -155,8 +158,9 @@ ALTER TABLE ONLY public.senzori ALTER COLUMN id SET DEFAULT nextval('public.senz
 -- Data for Name: lokacije; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.lokacije (id, naziv, nadmorska_visina) FROM stdin;
-1	Zagreb-Tresnjevka	125
+COPY public.lokacije (id, naziv, nadmorska_visina, vrsta_lokacije, latitude, longitude) FROM stdin;
+1	Zagreb-Tresnjevka	125	vanjska temperatura	45.79991700	15.95386100
+2	Zagreb-Tresnjevka	125	unutarnja temperatura	45.79991700	15.95386100
 \.
 
 
@@ -240,6 +244,66 @@ COPY public.mjerenja (id, temperatura, lokacija_id, datum, vrijeme, senzor_id) F
 73	15.20	1	2025-10-25	15:20:50	1
 74	14.00	1	2025-10-25	15:54:21	1
 75	13.70	1	2025-10-25	16:05:55	1
+76	21.60	2	2025-10-22	20:00:00	2
+77	21.70	2	2025-10-22	21:00:00	2
+78	22.08	2	2025-10-22	22:00:00	2
+79	22.14	2	2025-10-22	23:00:00	2
+80	21.93	2	2025-10-23	00:00:00	2
+81	21.78	2	2025-10-23	01:00:00	2
+82	21.69	2	2025-10-23	02:00:00	2
+83	21.62	2	2025-10-23	03:00:00	2
+84	21.52	2	2025-10-23	04:00:00	2
+85	21.51	2	2025-10-23	05:00:00	2
+86	21.50	2	2025-10-23	06:00:00	2
+87	21.50	2	2025-10-23	07:00:00	2
+88	21.48	2	2025-10-23	09:00:00	2
+89	21.88	2	2025-10-23	10:00:00	2
+90	22.00	2	2025-10-23	11:00:00	2
+91	22.08	2	2025-10-23	12:00:00	2
+92	21.96	2	2025-10-23	13:00:00	2
+93	22.00	2	2025-10-23	14:00:00	2
+94	21.94	2	2025-10-23	15:00:00	2
+95	22.02	2	2025-10-23	16:00:00	2
+96	22.17	2	2025-10-23	17:00:00	2
+97	22.10	2	2025-10-23	18:00:00	2
+98	22.10	2	2025-10-23	19:00:00	2
+99	22.02	2	2025-10-23	20:00:00	2
+100	21.96	2	2025-10-23	21:00:00	2
+101	21.78	2	2025-10-23	22:00:00	2
+102	21.80	2	2025-10-23	23:00:00	2
+103	21.77	2	2025-10-24	00:00:00	2
+104	21.77	2	2025-10-24	01:00:00	2
+105	21.78	2	2025-10-24	02:00:00	2
+106	21.78	2	2025-10-24	03:00:00	2
+107	21.76	2	2025-10-24	04:00:00	2
+108	21.76	2	2025-10-24	05:00:00	2
+109	21.74	2	2025-10-24	06:00:00	2
+110	21.74	2	2025-10-24	07:00:00	2
+111	21.76	2	2025-10-24	08:00:00	2
+112	21.80	2	2025-10-24	09:00:00	2
+113	21.74	2	2025-10-24	10:00:00	2
+114	21.80	2	2025-10-24	11:00:00	2
+115	21.80	2	2025-10-24	12:00:00	2
+116	21.93	2	2025-10-24	13:00:00	2
+117	22.25	2	2025-10-24	14:00:00	2
+118	22.28	2	2025-10-24	15:00:00	2
+119	22.30	2	2025-10-24	16:00:00	2
+120	22.28	2	2025-10-24	17:00:00	2
+121	22.30	2	2025-10-24	18:00:00	2
+122	22.28	2	2025-10-24	19:00:00	2
+123	22.34	2	2025-10-24	20:00:00	2
+124	22.34	2	2025-10-24	21:00:00	2
+125	22.34	2	2025-10-24	22:00:00	2
+126	22.26	2	2025-10-24	23:00:00	2
+127	22.32	2	2025-10-25	00:00:00	2
+128	22.28	2	2025-10-25	01:00:00	2
+129	22.30	2	2025-10-25	02:00:00	2
+130	21.68	2	2025-10-25	12:00:00	2
+131	21.58	2	2025-10-25	13:00:00	2
+132	21.62	2	2025-10-25	14:00:00	2
+133	21.59	2	2025-10-25	15:00:00	2
+134	22.02	2	2025-10-25	16:00:00	2
+135	22.20	2	2025-10-25	17:00:00	2
 \.
 
 
@@ -249,6 +313,7 @@ COPY public.mjerenja (id, temperatura, lokacija_id, datum, vrijeme, senzor_id) F
 
 COPY public.senzori (id, naziv, vrsta_mjerenja, lokacija_id) FROM stdin;
 1	Sonoff TH Elite 1	temperatura	1
+2	Xiaomi Temperature and Humidity Monitor 2	temperatura	2
 \.
 
 
@@ -256,21 +321,21 @@ COPY public.senzori (id, naziv, vrsta_mjerenja, lokacija_id) FROM stdin;
 -- Name: lokacije_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.lokacije_id_seq', 1, true);
+SELECT pg_catalog.setval('public.lokacije_id_seq', 2, true);
 
 
 --
 -- Name: mjerenja_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.mjerenja_id_seq', 75, true);
+SELECT pg_catalog.setval('public.mjerenja_id_seq', 135, true);
 
 
 --
 -- Name: senzori_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.senzori_id_seq', 1, true);
+SELECT pg_catalog.setval('public.senzori_id_seq', 2, true);
 
 
 --

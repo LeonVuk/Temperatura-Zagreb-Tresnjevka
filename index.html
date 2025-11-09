@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mjerenja temperature - Zagreb Tresnjevka</title>
+    <meta name="description" content="Skup podataka mjerenja temperature prikupljen Sonoff TH Elite senzorom na lokaciji Tresnjevka u Zagrebu">
+    <meta name="author" content="Leon Vuk">
+    <meta name="keywords" content="temperatura, mjerenja, Zagreb, Tresnjevka, senzor, podaci">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .download-links { margin: 20px 0; }
+        .download-links a { display: inline-block; margin: 5px; padding: 10px 15px; 
+                          background: #007cba; color: white; text-decoration: none; border-radius: 5px; }
+        .download-links a:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌡️ Skup podataka mjerenja temperature</h1>
+        
+        <h2>O skupu podataka</h2>
+        <p>Skup podataka sadrži mjerenja vanjske i unutarnje temperature prikupljena u kvartu Tresnjevka u Zagrebu.</p>
+        
+        <h3>Metapodaci</h3>
+        <div class="metadata-grid">
+            <div class="metadata-item"><strong>Licenca:</strong> Creative Commons 4.0 International (CC-by 4.0)</div>
+            <div class="metadata-item"><strong>Autor:</strong> Leon Vuk</div>
+            <div class="metadata-item"><strong>Verzija skupa:</strong> 2.0</div>
+            <div class="metadata-item"><strong>Jezik podataka:</strong> hrvatski</div>
+            <div class="metadata-item"><strong>Period mjerenja:</strong> 2025-10-22 do 2025-10-25</div>
+            <div class="metadata-item"><strong>Lokacija:</strong> Zagreb, kvart Tresnjevka</div>
+            <div class="metadata-item"><strong>Broj mjerenja:</strong> 130+</div>
+            <div class="metadata-item"><strong>Frekvencija:</strong> prosječno svakih sat vremena</div>
+            <div class="metadata-item"><strong>Nadmorska visina:</strong> 125 metara</div>
+            <div class="metadata-item"><strong>Baza podataka:</strong> PostgreSQL</div>
+        </div>
+
+        <div class="download-links">
+            <h3>Preuzimanje svih podataka</h3>
+            <a href="temperatura.csv" download> Preuzmi CSV</a>
+            <a href="temperatura.json" download> Preuzmi JSON</a>
+            <a href="schema.json" download> Preuzmi JSON Schema</a>
+        </div>
+
+        <div class="navigation">
+            <h3>Filtrirani prikaz podataka</h3>
+            <a href="datatable.html" style="padding: 10px 20px; background: #28a745; color: white; 
+                                          text-decoration: none; border-radius: 5px;">
+                Prikaži tablicu s filterima
+            </a>
+        </div>
+
+        <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc;">
+            <p>© 2025 Leon Vuk | <a href="LICENSE">Licenca CC BY 4.0</a></p>
+        </footer>
+    </div>
+</body>
+</html>

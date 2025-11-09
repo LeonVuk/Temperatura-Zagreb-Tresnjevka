@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://github.com/LeonVuk/Temperatura-Zagreb-Tresnjevka/blob/main/temperatura.json",
+  "type": "array",
+  "title": "Skup podataka mjerenja temperature",
+  "description": "Hijerarhijski skup podataka o mjerenjima temperature s više lokacija i senzora",
+  "items": {
+    "type": "object",
+    "title": "Lokacija",
+    "description": "Objekt koji sadrži podatke o lokaciji i pripadajućim senzorima",
+    "required": ["id", "naziv", "vrsta_lokacije", "latitude", "longitude", "senzori"],
+    "properties": {
+      "id": {
+        "type": "integer",
+        "title": "ID lokacije",
+        "description": "Jedinstveni identifikator lokacije"
+      },
+      "naziv": {
+        "type": "string",
+        "title": "Naziv lokacije", 
+        "description": "Naziv mjernog mjesta"
+      },
+      "nadmorska_visina": {
+        "type": "integer",
+        "title": "Nadmorska visina",
+        "description": "Nadmorska visina u metrima"
+      },
+      "vrsta_lokacije": {
+        "type": "string",
+        "title": "Vrsta lokacije",
+        "description": "Tip lokacije (vanjska/unutarnja temperatura)",
+        "enum": ["vanjska temperatura", "unutarnja temperatura"]
+      },
+      "latitude": {
+        "type": "number",
+        "title": "Geografska širina",
+        "description": "Latituda u decimalnom formatu"
+      },
+      "longitude": {
+        "type": "number", 
+        "title": "Geografska dužina",
+        "description": "Longituda u decimalnom formatu"
+      },
+      "senzori": {
+        "type": "array",
+        "title": "Popis senzora",
+        "description": "Popis senzora postavljenih na lokaciji",
+        "items": {
+          "type": "object",
+          "title": "Senzor",
+          "description": "Podaci o senzoru i njegovim mjerenjima",
+          "required": ["id", "naziv", "vrsta_mjerenja", "mjerenja"],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "title": "ID senzora",
+              "description": "Jedinstveni identifikator senzora"
+            },
+            "naziv": {
+              "type": "string",
+              "title": "Naziv senzora",
+              "description": "Naziv i model senzora"
+            },
+            "vrsta_mjerenja": {
+              "type": "string",
+              "title": "Vrsta mjerenja",
+              "description": "Vrsta fizikalne veličine koja se mjeri"
+            },
+            "mjerenja": {
+              "type": "array",
+              "title": "Popis mjerenja",
+              "description": "Povijest mjerenja senzora",
+              "items": {
+                "type": "object",
+                "title": "Mjerenje",
+                "description": "Pojedinačno mjerenje temperature",
+                "required": ["id", "temperatura", "datum", "vrijeme", "datum_vrijeme"],
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "title": "ID mjerenja",
+                    "description": "Jedinstveni identifikator mjerenja"
+                  },
+                  "temperatura": {
+                    "type": "number",
+                    "title": "Temperatura",
+                    "description": "Izmerena temperatura u °C"
+                  },
+                  "datum": {
+                    "type": "string",
+                    "title": "Datum",
+                    "description": "Datum mjerenja u formatu YYYY-MM-DD"
+                  },
+                  "vrijeme": {
+                    "type": "string", 
+                    "title": "Vrijeme",
+                    "description": "Vrijeme mjerenja u formatu HH:MM:SS"
+                  },
+                  "datum_vrijeme": {
+                    "type": "string",
+                    "title": "Datum i vrijeme",
+                    "description": "Potpuni timestamp mjerenja"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

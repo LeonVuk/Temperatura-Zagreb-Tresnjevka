@@ -1,25 +1,34 @@
 Mjerenja temperature - Zagreb Tresnjevka
 
-Podaci sadrže mjerenja temperature prikupljena Sonoff TH Elite senzorom na lokaciji Tresnjevka u Zagrebu. 
+Podaci sadrže mjerenja temperature prikupljena s dva senzora na lokaciji Tresnjevka u Zagrebu:
+	Sonoff TH Elite 1 - vanjska temperatura
+	Xiaomi Temperature and Humidity Monitor 2 - unutarnja temperatura
 Prikupljana su mjerenja u stvarnom vremenu tijekom razdoblja od tri dana.
 
 
 Metapodaci
 Licenca: Creative Commons 4.0 International (CC-by 4.0)
 Autor: Leon Vuk
-Verzija skupa podataka: 1.0
+Verzija skupa podataka: 2.0
 Jezik podatak: hrvatski
 Vremenski period mjerenja: 2025-10-22 do 2025-10-25
 Lokacija mjerenja: Zagreb, kvart Tresnjevka
-Broj mjerenja: 75
+Broj mjerenja: 130+
 Frekvencija mjerenja: prosječno svakih sat vremena
 Nadmorska visina: 125 metara
 
+Web sučelje
+Glavna stranica (index.html) - preuzimanje podataka i metapodaci
+Interaktivna tablica (datatable.html) - filtriranje i pregled podataka
+JSON Schema (schema.json) - strojno čitljivi metapodaci
 
 Opis atributa
 CSV format (stupci):
 - lokacija (string): Naziv lokacije mjerenja
 - nadmorska_visina (integer): Nadmorska visina u metrima
+- vrsta_lokacije (string): Vrsta lokacije (vanjska/unutarnja temperatura)
+- latitude (decimal): Geografska širina
+- longitude (decimal): Geografska dužina
 - senzor (string): Naziv i model korištenog senzora
 - vrsta_mjerenja (string): Vrsta fizikalne veličine koja se mjeri
 - temperatura (decimal): Temperatura u Celzijusima (°C)
@@ -33,6 +42,9 @@ JSON format:
   id (integer): Identifikator lokacije
   naziv (string): Naziv lokacije
   nadmorska_visina (integer): Nadmorska visina
+  vrsta_lokacije (string): Vrsta lokacije
+  latitude (decimal): Geografska širina
+  longitude (decimal): Geografska dužina
   
 - senzor (object):
   id (integer): Identifikator senzora
@@ -48,8 +60,8 @@ JSON format:
 
 Struktura podataka
  1 lokacija (Zagreb-Tresnjevka)
- 1 senzor (Sonoff TH Elite 1)
- Više mjerenja (75 mjerenja)
+ 2 senzora (Sonoff TH Elite 1 - vanjski, Xiaomi Temperature and Humidity Monitor 2 - unutarnji)
+ Više mjerenja (130+ mjerenja)
 
 
 Primjena

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="hr">
+<body>
+    <div class="container">
+        <h1>Tablica mjerenja temperature</h1>
+        <div class="filter-form">
+            <input type="text" id="searchInput" placeholder="Unesi izraz za pretragu...">
+            <select id="attributeSelect">
+                <option value="sve">Pretraži sve</option>
+                <option value="lokacija">Lokacija</option>
+                <option value="vrsta_lokacije">Vrsta lokacije</option>
+                <option value="senzor">Senzor</option>
+                <option value="temperatura">Temperatura</option>
+                <option value="datum">Datum</option>
+                <option value="vrijeme">Vrijeme</option>
+            </select>
+            <button onclick="filterData()">🔍 Filtriraj</button>
+            <button onclick="clearFilter()">❌ Očisti filter</button>
+        </div>
+
+        <div class="download-links" id="downloadLinks" style="display: none;">
+            <h3>Preuzmi filtrirane podatke:</h3>
+            <button onclick="exportCSV()">CSV</button>
+            <button onclick="exportJSON()">JSON</button>
+        </div>
+
+
+<style>
+
+#temperatureTable {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+#temperatureTable th {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+#temperatureTable td {
+    text-align: center;
+}
+
+
+#temperatureTable tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+#temperatureTable tr:hover {
+    background-color: #e9f7e9;
+}
+</style>
+
+<div class="table-container">
+    <table id="temperatureTable">
+        <thead>
+            <tr>
+                <th>Lokacija</th>
+                <th>Nadmorska visina</th>
+                <th>Vrsta</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>Senzor</th>
+                <th>Vrsta mjerenja</th>
+                <th>Temperatura (°C)</th>
+                <th>Datum</th>
+                <th>Vrijeme</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+</div>
+
+        <div class="navigation">
+            <a href="index.html">← Povratak na početnu</a>
+        </div>
+    </div>
+
+    <script src="frontend/script.js"></script>
+</body>
+</html>
