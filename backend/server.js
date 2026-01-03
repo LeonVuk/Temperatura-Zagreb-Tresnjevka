@@ -2,6 +2,7 @@ const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
 const { Parser } = require('json2csv');
+const openapiSpec = require('../openapi.json');
 
 const app = express();
 app.use(cors());
@@ -136,6 +137,224 @@ app.get('/api/export/json', async (req, res) => {
         console.error(error);
         res.status(500).json({ error: 'Greška pri exportu JSON' });
     }
+});
+
+const apiOdgovor = (status, poruka, odgovor = null, statusKod = 200) => {
+    return {
+        status: status,
+        message: poruka,
+        response: odgovor
+    };
+};
+
+app.get('/api/v1/temperature', async (req, res) => {
+    try {
+        const rezultat = await baza.query(`
+            SELECT m.*, l.naziv as lokacija_naziv, l.vrsta_lokacije, s.naziv as senzor_naziv
+            FROM mjerenja m
+            JOIN lokacije l ON m.lokacija_id = l.id
+            JOIN senzori s ON m.senzor_id = s.id
+            ORDER BY m.datum, m.vrijeme
+        `);
+        
+        res.status(200).json(
+            apiOdgovor('OK', 'Uspješno dohvaćena sva mjerenja temperature', rezultat.rows)
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri dohvaćanju mjerenja', null, 500)
+        );
+    }
+});
+
+app.get('/api/v1/temperature/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const rezultat = await baza.query(`
+            SELECT m.*, l.naziv as lokacija_naziv, l.vrsta_lokacije, s.naziv as senzor_naziv
+            FROM mjerenja m
+            JOIN lokacije l ON m.lokacija_id = l.id
+            JOIN senzori s ON m.senzor_id = s.id
+            WHERE m.id = $1
+        `, [id]);
+        
+        if (rezultat.rows.length === 0) {
+            return res.status(404).json(
+                apiOdgovor('Not Found', `Mjerenje s ID ${id} nije pronađeno`, null, 404)
+            );
+        }
+        
+        res.status(200).json(
+            apiOdgovor('OK', `Uspješno dohvaćeno mjerenje s ID ${id}`, rezultat.rows[0])
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri dohvaćanju mjerenja', null, 500)
+        );
+    }
+});
+
+app.get('/api/v1/lokacije', async (req, res) => {
+    try {
+        const rezultat = await baza.query('SELECT * FROM lokacije ORDER BY id');
+        res.status(200).json(
+            apiOdgovor('OK', 'Uspješno dohvaćene sve lokacije', rezultat.rows)
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri dohvaćanju lokacija', null, 500)
+        );
+    }
+});
+
+app.get('/api/v1/temperature/lokacija/:lokacijaId', async (req, res) => {
+    try {
+        const { lokacijaId } = req.params;
+        const rezultat = await baza.query(`
+            SELECT m.*, l.naziv as lokacija_naziv, s.naziv as senzor_naziv
+            FROM mjerenja m
+            JOIN lokacije l ON m.lokacija_id = l.id
+            JOIN senzori s ON m.senzor_id = s.id
+            WHERE m.lokacija_id = $1
+            ORDER BY m.datum, m.vrijeme
+        `, [lokacijaId]);
+        
+        res.status(200).json(
+            apiOdgovor('OK', `Uspješno dohvaćena mjerenja za lokaciju ${lokacijaId}`, rezultat.rows)
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri dohvaćanju mjerenja lokacije', null, 500)
+        );
+    }
+});
+
+app.post('/api/v1/temperature', async (req, res) => {
+    try {
+        const { lokacija_id, senzor_id, temperatura, datum, vrijeme } = req.body;
+        
+        if (!lokacija_id || !senzor_id || temperatura === undefined || !datum || !vrijeme) {
+            return res.status(400).json(
+                apiOdgovor('Bad Request', 'Nedostaju obavezna polja', null, 400)
+            );
+        }
+        
+        if (temperatura < -50 || temperatura > 50) {
+            return res.status(400).json(
+                apiOdgovor('Bad Request', 'Temperatura mora biti između -50 i 50°C', null, 400)
+            );
+        }
+        
+        const rezultat = await baza.query(`
+            INSERT INTO mjerenja (lokacija_id, senzor_id, temperatura, datum, vrijeme)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `, [lokacija_id, senzor_id, temperatura, datum, vrijeme]);
+        
+        res.status(201).json(
+            apiOdgovor('Created', 'Mjerenje uspješno kreirano', rezultat.rows[0], 201)
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri kreiranju mjerenja', null, 500)
+        );
+    }
+});
+
+app.put('/api/v1/temperature/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { temperatura, vrijeme } = req.body;
+        
+        const provjera = await baza.query('SELECT * FROM mjerenja WHERE id = $1', [id]);
+        if (provjera.rows.length === 0) {
+            return res.status(404).json(
+                apiOdgovor('Not Found', `Mjerenje s ID ${id} nije pronađeno`, null, 404)
+            );
+        }
+        
+        const updateovi = [];
+        const vrijednosti = [];
+        let brojParametra = 1;
+        
+        if (temperatura !== undefined) {
+            updateovi.push(`temperatura = $${brojParametra}`);
+            vrijednosti.push(temperatura);
+            brojParametra++;
+        }
+        
+        if (vrijeme !== undefined) {
+            updateovi.push(`vrijeme = $${brojParametra}`);
+            vrijednosti.push(vrijeme);
+            brojParametra++;
+        }
+        
+        if (updateovi.length === 0) {
+            return res.status(400).json(
+                apiOdgovor('Bad Request', 'Nisu dostavljena polja za ažuriranje', null, 400)
+            );
+        }
+        
+        vrijednosti.push(id);
+        const upit = `UPDATE mjerenja SET ${updateovi.join(', ')} WHERE id = $${brojParametra} RETURNING *`;
+        
+        const rezultat = await baza.query(upit, vrijednosti);
+        
+        res.status(200).json(
+            apiOdgovor('OK', `Mjerenje s ID ${id} uspješno ažurirano`, rezultat.rows[0])
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri ažuriranju mjerenja', null, 500)
+        );
+    }
+});
+
+app.delete('/api/v1/temperature/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const provjera = await baza.query('SELECT * FROM mjerenja WHERE id = $1', [id]);
+        if (provjera.rows.length === 0) {
+            return res.status(404).json(
+                apiOdgovor('Not Found', `Mjerenje s ID ${id} nije pronađeno`, null, 404)
+            );
+        }
+        
+        await baza.query('DELETE FROM mjerenja WHERE id = $1', [id]);
+        
+        res.status(200).json(
+            apiOdgovor('OK', `Mjerenje s ID ${id} uspješno obrisano`, null)
+        );
+    } catch (error) {
+        console.error(error);
+        res.status(500).json(
+            apiOdgovor('Internal Server Error', 'Greška pri brisanju mjerenja', null, 500)
+        );
+    }
+});
+
+app.get('/api/v1/openapi', (req, res) => {
+    res.status(200).json(openapiSpec);
+});
+
+app.use((req, res) => {
+    res.status(404).json(
+        apiOdgovor('Not Found', `Endpoint ${req.method} ${req.url} nije pronađen`, null, 404)
+    );
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json(
+        apiOdgovor('Internal Server Error', 'Došlo je do greške!', null, 500)
+    );
 });
 
 const PORT = process.env.PORT || 3000;

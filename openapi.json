@@ -1,0 +1,420 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Temperature Monitoring API",
+    "description": "REST API za pristup podacima mjerenja temperature",
+    "version": "3.0.0",
+    "contact": {
+      "name": "Leon Vuk",
+      "email": "leon.vuk@fer.hr"
+    },
+    "license": {
+      "name": "CC BY 4.0",
+      "url": "https://creativecommons.org/licenses/by/4.0/"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/api/v1/temperature": {
+      "get": {
+        "summary": "Dohvati sva mjerenja temperature",
+        "description": "Vraća listu svih mjerenja temperature s podacima o lokacijama i senzorima",
+        "responses": {
+          "200": {
+            "description": "Uspješno dohvaćena mjerenja",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Kreiraj novo mjerenje temperature",
+        "description": "Dodaje novo mjerenje temperature u bazu podataka",
+        "requestBody": {
+          "description": "Podaci novog mjerenja",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MjerenjeKreiraj"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Mjerenje uspješno kreirano",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Neispravni podaci",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/temperature/{id}": {
+      "get": {
+        "summary": "Dohvati mjerenje temperature po ID-u",
+        "description": "Vraća pojedinačno mjerenje temperature na temelju ID-a",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID mjerenja",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mjerenje pronađeno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Mjerenje nije pronađeno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Ažuriraj mjerenje temperature",
+        "description": "Ažurira postojeće mjerenje temperature",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID mjerenja za ažuriranje",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Podaci za ažuriranje mjerenja",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MjerenjeAzuriraj"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Mjerenje uspješno ažurirano",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Neispravni podaci",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Mjerenje nije pronađeno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Obriši mjerenje temperature",
+        "description": "Briše mjerenje temperature iz baze podataka",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID mjerenja za brisanje",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Mjerenje uspješno obrisano",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Mjerenje nije pronađeno",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/lokacije": {
+      "get": {
+        "summary": "Dohvati sve lokacije",
+        "description": "Vraća listu svih lokacija za mjerenje temperature",
+        "responses": {
+          "200": {
+            "description": "Uspješno dohvaćene lokacije",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/temperature/lokacija/{lokacijaId}": {
+      "get": {
+        "summary": "Dohvati mjerenja po lokaciji",
+        "description": "Vraća sva mjerenja temperature za određenu lokaciju",
+        "parameters": [
+          {
+            "name": "lokacijaId",
+            "in": "path",
+            "description": "ID lokacije",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Uspješno dohvaćena mjerenja za lokaciju",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Interna greška servera",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiOdgovor"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/openapi": {
+      "get": {
+        "summary": "Dohvati OpenAPI specifikaciju",
+        "description": "Vraća OpenAPI specifikaciju ovog API-ja u JSON formatu",
+        "responses": {
+          "200": {
+            "description": "Specifikacija uspješno dohvaćena",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApiOdgovor": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "description": "Status odgovora"
+          },
+          "message": {
+            "type": "string",
+            "description": "Poruka za korisnika"
+          },
+          "response": {
+            "description": "Stvarni podaci odgovora (može biti objekt, array ili null)"
+          }
+        },
+        "required": ["status", "message"]
+      },
+      "MjerenjeKreiraj": {
+        "type": "object",
+        "properties": {
+          "lokacija_id": {
+            "type": "integer",
+            "description": "ID lokacije",
+            "example": 1
+          },
+          "senzor_id": {
+            "type": "integer",
+            "description": "ID senzora",
+            "example": 1
+          },
+          "temperatura": {
+            "type": "number",
+            "description": "Vrijednost temperature u °C",
+            "minimum": -50,
+            "maximum": 50,
+            "example": 22.5
+          },
+          "datum": {
+            "type": "string",
+            "format": "date",
+            "description": "Datum mjerenja (YYYY-MM-DD)",
+            "example": "2024-01-15"
+          },
+          "vrijeme": {
+            "type": "string",
+            "description": "Vrijeme mjerenja (HH:MM:SS)",
+            "example": "14:30:00"
+          }
+        },
+        "required": ["lokacija_id", "senzor_id", "temperatura", "datum", "vrijeme"]
+      },
+      "MjerenjeAzuriraj": {
+        "type": "object",
+        "properties": {
+          "temperatura": {
+            "type": "number",
+            "description": "Nova vrijednost temperature u °C",
+            "minimum": -50,
+            "maximum": 50,
+            "example": 23.0
+          },
+          "vrijeme": {
+            "type": "string",
+            "description": "Novo vrijeme mjerenja (HH:MM:SS)",
+            "example": "15:00:00"
+          }
+        }
+      }
+    }
+  }
+}
