@@ -1,0 +1,36 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  "name": "Mjerenja temperature u Zagrebu - Trešnjevka",
+  "description": "Skup podataka s mjerenjima temperature s unutarnjih i vanjskih lokacija",
+  "temporalCoverage": "2025-10-22/2025-10-25",
+  "measurementTechnique": "temperature sensing",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  
+  "variableMeasured": [
+    {
+      "@type": "PropertyValue",
+      "name": "Temperature",
+      "unitText": "degree Celsius",
+      "description": "Air temperature measurements"
+    }
+  ],
+  
+  "spatialCoverage": {
+    "@type": "Place",
+    "name": "Zagreb, Trešnjevka, Croatia",
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 45.799917,
+      "longitude": 15.953861
+    }
+  },
+  
+  "distribution": {
+    "@type": "DataDownload",
+    "encodingFormat": "application/json",
+    "contentUrl": "http://localhost:3000/api/v1/temperature",
+    "name": "Temperature Measurements JSON",
+    "description": "Complete dataset of temperature measurements"
+  }
+}

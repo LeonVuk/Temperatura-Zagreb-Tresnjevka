@@ -10,10 +10,19 @@
     <style>
         body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
         .container { max-width: 800px; margin: 0 auto; }
-        .download-links { margin: 20px 0; }
-        .download-links a { display: inline-block; margin: 5px; padding: 10px 15px; 
-                          background: #007cba; color: white; text-decoration: none; border-radius: 5px; }
-        .download-links a:hover { background: #005a87; }
+        .metadata-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 20px 0; }
+        .metadata-item { padding: 10px; background: #f8f9fa; border-radius: 5px; }
+        .auth-navigation { margin: 30px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
+        .auth-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+        .btn { padding: 10px 20px; color: white; text-decoration: none; border-radius: 5px; border: none; cursor: pointer; }
+        .btn-login { background: #007cba; }
+        .btn-profile { background: #28a745; }
+        .btn-logout { background: #dc3545; }
+        .user-info { margin-bottom: 15px; }
+        .download-section { margin: 20px 0; padding: 20px; background: #f8f9fa; border-radius: 10px; }
+        .download-btn { display: inline-block; margin: 5px; padding: 10px 15px; background: #007cba; color: white; text-decoration: none; border-radius: 5px; }
+        .api-links { margin-top: 30px; padding: 15px; background: #e9f7fe; border-radius: 5px; }
+        .protected-section { display: none; } 
     </style>
 </head>
 <body>
@@ -27,7 +36,7 @@
         <div class="metadata-grid">
             <div class="metadata-item"><strong>Licenca:</strong> Creative Commons 4.0 International (CC-by 4.0)</div>
             <div class="metadata-item"><strong>Autor:</strong> Leon Vuk</div>
-            <div class="metadata-item"><strong>Verzija skupa:</strong> 2.0</div>
+            <div class="metadata-item"><strong>Verzija skupa:</strong> 4.0</div>
             <div class="metadata-item"><strong>Jezik podataka:</strong> hrvatski</div>
             <div class="metadata-item"><strong>Period mjerenja:</strong> 2025-10-22 do 2025-10-25</div>
             <div class="metadata-item"><strong>Lokacija:</strong> Zagreb, kvart Tresnjevka</div>
@@ -37,6 +46,20 @@
             <div class="metadata-item"><strong>Baza podataka:</strong> PostgreSQL</div>
         </div>
 
+        <div class="auth-navigation">
+            <h3>Korisnička prijava (Auth0)</h3>
+            <div id="authLinks">
+
+
+
+                <p>Prijavite se za pristup dodatnim funkcionalnostima:</p>
+                <div class="auth-buttons">
+                    <button onclick="login()" class="btn btn-login">Prijava</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="protectedSection" class="protected-section">
         <div class="download-links">
             <h3>Preuzimanje svih podataka</h3>
             <a href="temperatura.csv" download> Preuzmi CSV</a>
@@ -51,10 +74,92 @@
                 Prikaži tablicu s filterima
             </a>
         </div>
+        </div>
+
+        <div class="api-links">
+            <h3>API Endpoints</h3>
+            <p><strong>JSON-LD (semantički podaci):</strong> <a href="http://localhost:3000/api/v1/temperature/json-ld" target="_blank">/api/v1/temperature/json-ld</a></p>
+            <p><strong>Korisnički profil:</strong> <a href="http://localhost:3000/profile" target="_blank">/profile</a> (za prijavljene)</p>
+            <p><strong>OpenAPI specifikacija:</strong> <a href="http://localhost:3000/api/v1/openapi" target="_blank">/api/v1/openapi</a> (za prijavljene)</p>
+        </div>
 
         <footer style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc;">
             <p>© 2025 Leon Vuk | <a href="LICENSE">Licenca CC BY 4.0</a></p>
         </footer>
     </div>
+
+    <script>
+        function login() {
+            window.location.href = 'http://localhost:3000/login';
+        }
+
+        function logout() {
+            window.location.href = 'http://localhost:3000/logout';
+        }
+
+        async function checkAuthStatus() {
+            try {
+                const response = await fetch('http://localhost:3000/profile', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    updateAuthLinks(data.user);
+                    showProtectedSection();
+                    return true;
+                } else {
+                    hideProtectedSection();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Greška pri provjeri statusa:', error);
+                hideProtectedSection(); 
+                return false;
+            }
+        }
+
+        function updateAuthLinks(user) {
+            const authLinks = document.getElementById('authLinks');
+            if (user) {
+                authLinks.innerHTML = `
+                    <div class="user-info">
+                        Dobrodošli, <strong>${user.name || user.nickname || user.email}</strong>!
+                    </div>
+                    <div class="auth-buttons">
+                        <a href="http://localhost:3000/profile" class="btn btn-profile">Korisnički profil</a>
+                        <button onclick="logout()" class="btn btn-logout">Odjava</button>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                        Sada imate pristup zaštićenim funkcionalnostima.
+                    </p>
+                `;
+            } else {
+                authLinks.innerHTML = `
+                    <p>Prijavite se za pristup dodatnim funkcionalnostima:</p>
+                    <div class="auth-buttons">
+                        <button onclick="login()" class="btn btn-login">Prijava putem Auth0</button>
+                    </div>
+                    <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                        <strong>Testni korisnik:</strong> or@or.hr / Password1!
+                    </p>
+                `;
+            }
+        }
+
+        function showProtectedSection() {
+            const protectedSection = document.getElementById('protectedSection');
+            protectedSection.style.display = 'block';
+        }
+
+        function hideProtectedSection() {
+            const protectedSection = document.getElementById('protectedSection');
+            protectedSection.style.display = 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuthStatus();
+        });
+    </script>
 </body>
 </html>

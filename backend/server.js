@@ -3,10 +3,86 @@ const { Pool } = require('pg');
 const cors = require('cors');
 const { Parser } = require('json2csv');
 const openapiSpec = require('../openapi.json');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const session = require('express-session');
+const { auth } = require('express-openid-connect');
+
+
+const auth0Config = {
+  authRequired: false,
+  auth0Logout: true,
+  secret: 'tNIcjJd2ugrGH_qdjk2IzCZDbGN3Kj4mKXMVo20pCfpn5FdCGrC3MufGMvrwp0G1',
+  baseURL: 'http://localhost:3000',
+  clientID: '551M0V7sIrzXKDPNFM0t2lL4avJriwgZ',
+  issuerBaseURL: 'https://dev-ljwyf82o1jh1m8ga.us.auth0.com'
+};
+
+app.use(auth(auth0Config));
+
+app.use(session({
+  secret: 'nntdfnntdfsxjn',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false } 
+}));
+
+function requiresAuth() {
+  return (req, res, next) => {
+    if (!req.oidc.isAuthenticated()) {
+      return res.status(401).json({
+        status: 'Unauthorized',
+        message: 'Potrebna je prijava'
+      });
+    }
+    next();
+  };
+}
+
+app.use(express.static(path.join(__dirname, '..')));
+
+const datatablePath = path.join(__dirname, '../datatable.html');
+app.get('/datatable.html', requiresAuth(),(req, res) => {
+    res.sendFile(datatablePath);
+});
+
+const profilePath = path.join(__dirname, '../profile.html');
+app.get('/profile.html',requiresAuth(), (req, res) => {
+    res.sendFile(profilePath);
+});
+
+const indexPath = path.join(__dirname, '../index.html');
+app.get('/', (req, res) => {
+    res.sendFile(indexPath);
+});
+
+
+app.get('/login', (req, res) => {
+  res.oidc.login({
+    returnTo: '/profile',
+    authorizationParams: {
+      response_type: 'code',
+      scope: 'openid profile email'
+    }
+  });
+});
+
+app.get('/profile', requiresAuth(), (req, res) => {
+  res.json({
+    user: req.oidc.user,
+    isAuthenticated: req.oidc.isAuthenticated()
+  });
+});
+
+const JSONLD = path.join(__dirname, '../json-ld.json');
+app.get('/api/v1/temperature/json-ld', requiresAuth(),(req, res) => {
+    res.sendFile(JSONLD);
+});
+
 
 const baza = new Pool({
     user: 'postgres',
@@ -100,7 +176,7 @@ function uJSONFormat(podaci) {
     }));
 }
 
-app.get('/api/temperature', async (req, res) => {
+app.get('/api/temperature',requiresAuth(), async (req, res) => {
     try {
         const { upit, parametri } = napraviUpit(req.query.search, req.query.attribute);
         const rezultat = await baza.query(upit, parametri);
@@ -111,7 +187,7 @@ app.get('/api/temperature', async (req, res) => {
     }
 });
 
-app.get('/api/export/csv', async (req, res) => {
+app.get('/api/export/csv',requiresAuth(), async (req, res) => {
     try {
         const { upit, parametri } = napraviUpit(req.query.search, req.query.attribute);
         const rezultat = await baza.query(upit, parametri);
@@ -125,7 +201,7 @@ app.get('/api/export/csv', async (req, res) => {
     }
 });
 
-app.get('/api/export/json', async (req, res) => {
+app.get('/api/export/json', requiresAuth(),async (req, res) => {
     try {
         const { upit, parametri } = napraviUpit(req.query.search, req.query.attribute);
         const rezultat = await baza.query(upit, parametri);
@@ -147,7 +223,7 @@ const apiOdgovor = (status, poruka, odgovor = null, statusKod = 200) => {
     };
 };
 
-app.get('/api/v1/temperature', async (req, res) => {
+app.get('/api/v1/temperature',requiresAuth(), async (req, res) => {
     try {
         const rezultat = await baza.query(`
             SELECT m.*, l.naziv as lokacija_naziv, l.vrsta_lokacije, s.naziv as senzor_naziv
@@ -168,7 +244,7 @@ app.get('/api/v1/temperature', async (req, res) => {
     }
 });
 
-app.get('/api/v1/temperature/:id', async (req, res) => {
+app.get('/api/v1/temperature/:id',requiresAuth(), async (req, res) => {
     try {
         const { id } = req.params;
         const rezultat = await baza.query(`
@@ -196,7 +272,7 @@ app.get('/api/v1/temperature/:id', async (req, res) => {
     }
 });
 
-app.get('/api/v1/lokacije', async (req, res) => {
+app.get('/api/v1/lokacije',requiresAuth(), async (req, res) => {
     try {
         const rezultat = await baza.query('SELECT * FROM lokacije ORDER BY id');
         res.status(200).json(
@@ -210,7 +286,7 @@ app.get('/api/v1/lokacije', async (req, res) => {
     }
 });
 
-app.get('/api/v1/temperature/lokacija/:lokacijaId', async (req, res) => {
+app.get('/api/v1/temperature/lokacija/:lokacijaId',requiresAuth(), async (req, res) => {
     try {
         const { lokacijaId } = req.params;
         const rezultat = await baza.query(`
@@ -233,7 +309,7 @@ app.get('/api/v1/temperature/lokacija/:lokacijaId', async (req, res) => {
     }
 });
 
-app.post('/api/v1/temperature', async (req, res) => {
+app.post('/api/v1/temperature',requiresAuth(), async (req, res) => {
     try {
         const { lokacija_id, senzor_id, temperatura, datum, vrijeme } = req.body;
         
@@ -266,7 +342,7 @@ app.post('/api/v1/temperature', async (req, res) => {
     }
 });
 
-app.put('/api/v1/temperature/:id', async (req, res) => {
+app.put('/api/v1/temperature/:id',requiresAuth(), async (req, res) => {
     try {
         const { id } = req.params;
         const { temperatura, vrijeme } = req.body;
@@ -316,7 +392,7 @@ app.put('/api/v1/temperature/:id', async (req, res) => {
     }
 });
 
-app.delete('/api/v1/temperature/:id', async (req, res) => {
+app.delete('/api/v1/temperature/:id', requiresAuth(),async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -340,7 +416,7 @@ app.delete('/api/v1/temperature/:id', async (req, res) => {
     }
 });
 
-app.get('/api/v1/openapi', (req, res) => {
+app.get('/api/v1/openapi',requiresAuth(), (req, res) => {
     res.status(200).json(openapiSpec);
 });
 
